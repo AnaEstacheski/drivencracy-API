@@ -1,14 +1,8 @@
 import { pollCollection } from "../database/db.js";
-import dayjs from "dayjs";
 
 export async function pollPost(req, res) {
+    
     const poll = res.locals.poll;
-    let expirationDate;
-
-    if (!poll.expireAt || poll.expireAt === null || poll.expireAt === " ") {
-        expirationDate = dayjs().add(30 , "day").format("YYYY-MM-DD HH:mm")
-        poll.expireAt = expirationDate;
-    }
 
     try {
         await pollCollection.insertOne(poll);

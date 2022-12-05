@@ -2,7 +2,18 @@ import { pollSchema } from '../models/pollSchema.js'
 import dayjs from "dayjs"
 
 export function pollValidation(req, res, next) {
-    const poll = req.body;
+    let { title, expireAt } = req.body;
+    let expirationDate;
+
+    if (!expireAt || expireAt === null || expireAt === " ") {
+        expirationDate = dayjs().add(30 , "day").format("YYYY-MM-DD HH:mm")
+        expireAt = expirationDate;
+    }
+
+    const poll = {
+        title,
+        expireAt
+    };
 
     const { error } = pollSchema.validate(poll, { abortEarly: false });
   
