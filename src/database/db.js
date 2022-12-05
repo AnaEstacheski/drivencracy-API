@@ -10,13 +10,13 @@ const mongoClient = new MongoClient(process.env.MONGO_URI);
 // top-level await
 try {
     await mongoClient.connect();
-    console.log("MongoDB Connected!");
+    console.log("MongoDB connected!");
 } catch (err) {
-    console.log(err)
+    console.log(err);
 }
 
 const db = mongoClient.db("drivencracy");
 
-export const usersCollection = db.collection("poll");
-export const sessionsCollection = db.collection("options");
-export const productsCollection = db.collection("votes");
+export const pollCollection = db.collection("poll");
+export const choiceCollection = db.collection("choice");
+export const votesCollection = db.collection("votes");
