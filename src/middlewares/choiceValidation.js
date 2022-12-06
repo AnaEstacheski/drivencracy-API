@@ -3,31 +3,27 @@ import { ObjectId } from 'mongodb';
 import { choiceSchema } from '../models/choiceShema.js'
 import dayjs from "dayjs";
 
-const repeat = async (title) => {
-    const findtitle = await choiceCollection.findOne({ title })
-    return findtitle
-}
-
 export async function choiceValidation(req, res, next) {
-    const { title, pollId } = req.body
-
-    const research = await pollCollection.findOne({ _id: ObjectId(pollId) })
+    const { pollId } = req.body
+    const choice = req.body
+    let today;
+    today = dayjs();
 
     try {
-
-        if (research.expireAt <= dayjs().format('YYYY-MM-DD HH:mm')) {
-            res.sendStatus(403);
-            return
-        }
-
+        const research = await pollCollection.findOne({ _id: new ObjectId(pollId) })
         if (!research) {
             res.status(404).send("Poll not find");
             return
         }
+        if (today.isAfter(research.expireAt)) {
+            res.sendStatus(403)
+            return
+        }
 
-        const choice = {
-            title,
-            pollId: ObjectId(pollId)
+        const sameTitle = await choiceCollection.findOne({ title: choice.title });
+        if (sameTitle) {
+            res.sendStatus(409);
+            return
         }
 
         const { error } = choiceSchema.validate(choice, { abortEarly: false })
@@ -36,12 +32,6 @@ export async function choiceValidation(req, res, next) {
             const errors = error.details.map((detail) => detail.message);
             return res.status(422).send(errors);
         }
-
-        if (await repeat(title)) {
-            res.sendStatus(409);
-            return
-        }
-
     } catch (err) {
         res.status(500).send(err.message);
     }
